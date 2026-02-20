@@ -40,23 +40,28 @@ alloy("sendEvent", {
     tech: "SFTP / S3 / API · CSV / Parquet",
     desc: "Historical CRM records, purchase history, loyalty data — scheduled daily/hourly",
     color: "border-border bg-surface",
-    payload: `// 1. Create Batch (Server-Side API)
-// POST https://platform.adobe.io/data/foundation/import/batches
-// Body: { "datasetId": "ds-loyalty-records" }
+    payload: `// 1. Create Batch (ONE-TIME call to open the container)
+// POST /data/foundation/import/batches
+// Body: { "datasetId": "ds-loyalty" } -> Returns { "id": "BATCH-123" }
 
-// 2. Upload File (Flat JSON/CSV mapping to XDM)
+// 2. Upload Data (ONE-TIME bulk upload of the entire file)
+// PUT /data/foundation/import/batches/BATCH-123/files/data.json
+// Note: This file contains thousands of records at once (FLAT JSON/CSV).
+
+// 3. Signal Completion (Triggers validation & processing)
+// POST /data/foundation/import/batches/BATCH-123?action=COMPLETE
+
+// Example File Content (Uploaded in Step 2):
 [
   {
-    "identityMap": {
-      "Email": [{ "id": "user@example.com" }]
-    },
-    "person": {
-      "name": { "firstName": "Sarah" }
-    },
-    "loyaltyDetails": {
-      "tier": "Gold",
-      "points": 8420
-    }
+    "identityMap": { "Email": [{ "id": "sarah@example.com" }] },
+    "person": { "name": { "firstName": "Sarah" } },
+    "loyaltyDetails": { "tier": "Gold", "points": 8420 }
+  },
+  {
+    "identityMap": { "Email": [{ "id": "bob@example.com" }] },
+    "person": { "name": { "firstName": "Bob" } },
+    "loyaltyDetails": { "tier": "Silver", "points": 1205 }
   }
 ]`,
   },
@@ -67,7 +72,7 @@ alloy("sendEvent", {
     tech: "HTTP Data Collection API / Kafka",
     desc: "Transactional events from backend systems — order confirmations, payments, status updates",
     color: "border-border bg-surface",
-    payload: `// Server-Side Streaming Request
+    payload: `// Server-Side Streaming Request (Sent per record/event)
 // POST https://platform.adobe.io/data/core/edge/events
 
 {
