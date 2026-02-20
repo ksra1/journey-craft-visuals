@@ -9,14 +9,18 @@ const sources = [
     tech: "alloy.js / Adobe Experience SDK",
     desc: "Real-time behavioral events triggered by user actions in the browser or app",
     color: "border-aep bg-aep-light",
-    payload: `// Datastream Config (External via Edge Network)
-// Edge sends it to AEP using this config:
-// Datastream ID: "eff0-562-b12"
-// Target Schema: "web-event-schema"
+    payload: `// 1. Implementation (Client-Side)
+import { createInstance } from "@adobe/alloy";
+const alloy = createInstance({ name: "alloy" });
 
-// Response in browser:
-{
-  "xdm": {
+alloy("configure", {
+  datastreamId: "eff0-562-b12", // Metadata handled by Edge
+  orgId: "ADB-ORG-88@AdobeOrg"
+});
+
+// 2. Execution
+alloy("sendEvent", {
+  xdm: {
     "eventType": "commerce.productViews",
     "commerce": {
       "productViews": { "value": 1 }
@@ -27,7 +31,7 @@ const sources = [
       "priceTotal": 199.00
     }]
   }
-}`,
+});`,
   },
   {
     id: "batch",
@@ -36,22 +40,25 @@ const sources = [
     tech: "SFTP / S3 / API · CSV / Parquet",
     desc: "Historical CRM records, purchase history, loyalty data — scheduled daily/hourly",
     color: "border-border bg-surface",
-    payload: `// Metadata provided via API POST endpoint:
-// POST /batches?datasetId=ds-loyalty-records
+    payload: `// 1. Create Batch (Server-Side API)
+// POST https://platform.adobe.io/data/foundation/import/batches
+// Body: { "datasetId": "ds-loyalty-records" }
 
-// Resulting Payload (No wrapper required):
-{
-  "identityMap": {
-    "Email": [{ "id": "user@example.com" }]
-  },
-  "person": {
-    "name": { "firstName": "Sarah" }
-  },
-  "loyaltyDetails": {
-    "tier": "Gold",
-    "points": 8420
+// 2. Upload File (Flat JSON/CSV mapping to XDM)
+[
+  {
+    "identityMap": {
+      "Email": [{ "id": "user@example.com" }]
+    },
+    "person": {
+      "name": { "firstName": "Sarah" }
+    },
+    "loyaltyDetails": {
+      "tier": "Gold",
+      "points": 8420
+    }
   }
-}`,
+]`,
   },
   {
     id: "stream",
@@ -60,10 +67,15 @@ const sources = [
     tech: "HTTP Data Collection API / Kafka",
     desc: "Transactional events from backend systems — order confirmations, payments, status updates",
     color: "border-border bg-surface",
-    payload: `// Server-Side Streaming (Requires explicit header)
+    payload: `// Server-Side Streaming Request
+// POST https://platform.adobe.io/data/core/edge/events
+
 {
   "header": {
-    "schemaRef": { "id": "order-schema", "version": "1.0" },
+    "schemaRef": { 
+      "id": "https://ns.adobe.com/tenant/schemas/order-schema",
+      "contentType": "application/vnd.adobe.xed-full+json;version=1"
+    },
     "imsOrgId": "{ORG_ID}"
   },
   "body": {

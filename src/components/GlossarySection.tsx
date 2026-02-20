@@ -3,6 +3,9 @@ import { useScrollReveal } from "./useScrollReveal";
 const terms = [
   // AEP terms
   { label: "XDM", system: "AEP", desc: "Experience Data Model — the standard schema framework for all AEP data" },
+  { label: "Schema", system: "AEP", desc: "The 'Blueprint'. Defines the structure, fields, and data types (e.g., Individual Profile or ExperienceEvent)." },
+  { label: "Dataset", system: "AEP", desc: "The 'Storage Bin'. A container for the actual data records or files, tied to a specific Schema." },
+  { label: "Datastream", system: "AEP", desc: "The 'Router'. Server-side config that tells the Edge Network which Schema and Dataset to use for Web SDK events." },
   { label: "Real-Time Profile", system: "AEP", desc: "A unified, stitched view of a customer across all channels and devices" },
   { label: "Segment / Audience", system: "AEP", desc: "A named group of profiles matching defined attribute + event rules" },
   { label: "Streaming Segmentation", system: "AEP", desc: "Real-time segment evaluation as profile events arrive (<1s latency)" },
@@ -10,7 +13,6 @@ const terms = [
   { label: "Streaming Ingestion", system: "AEP", desc: "Real-time data ingestion via HTTP API or alloy.js Web SDK" },
   { label: "Batch Ingestion", system: "AEP", desc: "Scheduled file-based import via SFTP, S3, Azure, or API" },
   { label: "Identity Graph", system: "AEP", desc: "Stitches multiple identifiers (ECID, email, loyaltyId) to one profile" },
-  { label: "Datastream", system: "AEP", desc: "Server-side configuration routing Web SDK events to AEP services" },
   { label: "alloy.js", system: "AEP", desc: "Adobe's Web SDK for collecting events from browser/mobile apps" },
   // AJO terms
   { label: "Journey", system: "AJO", desc: "A real-time, event-driven multi-step orchestration flow for individual profiles" },
