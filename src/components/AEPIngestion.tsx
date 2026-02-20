@@ -9,7 +9,13 @@ const sources = [
     tech: "alloy.js / Adobe Experience SDK",
     desc: "Real-time behavioral events triggered by user actions in the browser or app",
     color: "border-aep bg-aep-light",
-    payload: `{
+    payload: `// Datastream Config (External via Edge Network)
+// Edge sends it to AEP using this config:
+// Datastream ID: "eff0-562-b12"
+// Target Schema: "web-event-schema"
+
+// Response in browser:
+{
   "xdm": {
     "eventType": "commerce.productViews",
     "commerce": {
@@ -30,7 +36,10 @@ const sources = [
     tech: "SFTP / S3 / API · CSV / Parquet",
     desc: "Historical CRM records, purchase history, loyalty data — scheduled daily/hourly",
     color: "border-border bg-surface",
-    payload: `// CRM export mapped to XDM Individual Profile
+    payload: `// Metadata provided via API POST endpoint:
+// POST /batches?datasetId=ds-loyalty-records
+
+// Resulting Payload (No wrapper required):
 {
   "identityMap": {
     "Email": [{ "id": "user@example.com" }]
@@ -51,19 +60,17 @@ const sources = [
     tech: "HTTP Data Collection API / Kafka",
     desc: "Transactional events from backend systems — order confirmations, payments, status updates",
     color: "border-border bg-surface",
-    payload: `POST /collection/entities HTTP/1.1
-Content-Type: application/json
-
+    payload: `// Server-Side Streaming (Requires explicit header)
 {
-  "header": { "datasetId": "ds-orders" },
+  "header": {
+    "schemaRef": { "id": "order-schema", "version": "1.0" },
+    "imsOrgId": "{ORG_ID}"
+  },
   "body": {
-    "xdmMeta": {
-      "schemaRef": { "id": "order-schema" }
-    },
-    "xdmEntity": {
+    "xdm": {
       "eventType": "commerce.purchases",
       "orderId": "ORD-98712",
-      "totalValue": 349.00
+      "timestamp": "2023-10-27T10:30:00Z"
     }
   }
 }`,
@@ -99,6 +106,32 @@ export const AEPIngestion = () => {
             Three lanes carry data into AEP. Each is normalized against an{" "}
             <strong>XDM schema</strong> before merging into the Real-Time Customer Profile.
           </p>
+          
+          <div className="mt-6 p-4 bg-muted/30 rounded-lg border border-border inline-block max-w-3xl">
+            <h4 className="text-sm font-bold text-foreground mb-2 flex items-center gap-2">
+              <span className="text-blue-500">💡</span> Why does the JSON structure change?
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-medium">
+              <div>
+                <span className="text-primary block mb-1">Web SDK (alloy.js)</span>
+                <p className="text-muted-foreground leading-relaxed">
+                  Uses <code className="bg-muted px-1 rounded">"xdm": {}</code> wrapper. Metadata (OrgID, Schema) is handled by the <strong>Datastream</strong> config.
+                </p>
+              </div>
+              <div>
+                <span className="text-primary block mb-1">Batch Ingestion</span>
+                <p className="text-muted-foreground leading-relaxed">
+                  <strong>Flat JSON</strong>. No wrapper needed because Metadata is provided externally via the <strong>Batch API/Dataset ID</strong>.
+                </p>
+              </div>
+              <div>
+                <span className="text-primary block mb-1">Streaming API</span>
+                <p className="text-muted-foreground leading-relaxed">
+                  <strong>Wrapped JSON</strong>. Each message is independent and must include a <code className="bg-muted px-1 rounded">header</code> with the <strong>Schema Reference</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
