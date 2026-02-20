@@ -38,6 +38,20 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    /* AEP + AJO brand tokens */
+    --aep: 213 90% 49%;
+    --aep-foreground: 0 0% 100%;
+    --aep-light: 213 90% 96%;
+    --aep-muted: 213 50% 92%;
+
+    --ajo: 354 75% 57%;
+    --ajo-foreground: 0 0% 100%;
+    --ajo-light: 354 75% 96%;
+    --ajo-muted: 354 40% 92%;
+
+    --surface: 220 14% 97%;
+    --surface-2: 220 14% 94%;
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
