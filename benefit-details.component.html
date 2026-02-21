@@ -1,0 +1,212 @@
+@if (showParentInfoMessage()) {
+  <div class="col-12 px-3">
+    <h2 class="col-12 mt-4 font static-text">
+      {{ i18nResprCoverage?.messages?.whatscovered_service_info_header }}
+    </h2>
+    <div class="alert alert-secondary in_page mb-2 mb-md-3" role="alert">
+      <div class="row">
+        <div class="col-12 text-start">
+          <div class="alert_icon alert_info">
+            <span class="info_icon white"></span>
+          </div>
+          <p class="alert_content">
+            {{ i18nResprCoverage?.messages?.whatscovered_service_info_message }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+@if (yearEndBenefits) {
+  <div class="col-12 px-3">
+    <div class="alert alert-secondary in_page mb-2 mb-md-3" role="alert">
+      <div class="row">
+        <div class="col-12 text-start">
+          <div class="alert_icon alert_info">
+            <span class="info_icon white"></span>
+          </div>
+          <div class="alert_content">
+            <p [innerHTML]="yearEndBenefits | safeHtmlStandalone"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else if (showError) {
+  <div class="col-12 px-3">
+    <h2 class="col-12 mt-4 font">
+      {{ i18nResprCoverage?.messages?.benefits_header }}
+    </h2>
+    <div class="alert alert_secondary in_page mb-2 mb-md-3" role="alert">
+      <div class="row">
+        <div class="col-12 text-start">
+          <span class="fas fa-exclamation"></span>
+          <div class="alert_content dismissable">
+            <p class="col-12">
+              {{ i18nResprCoverage?.messages?.medical_service_error_message }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} @else {
+  @if (whatsCoveredDataLoaded && !isBcnamApp && !hideSection) {
+    <div class="h3 col-12 px-3" id="search-title">Search</div>
+    <div class="search-box p-3" id="search-box">
+      <app-search-bar></app-search-bar>
+    </div>
+
+    @if (hasMatches === false) {
+      <div id="error-section" class="container-fluid px-3 px-xl-0 py-2 mt-3">
+        <div class="container px-0">
+          <div class="row">
+            <div class="col-12">
+              <p>
+                {{ i18nResprCoverage?.messages?.mycoverage_you_can_also }}
+                <a [attr.href]="estimatePrescriptionPath" 
+                   [attr.aria-label]="i18nResprCoverage?.messages?.search_mycoverage_prescription_coverage_aria_label"
+                   [attr.data-analytics]="i18nResprCoverage?.messages?.search_mycoverage_prescription_coverage_data_analytics">
+                  {{ i18nResprCoverage?.messages?.mycoverage_prep_coverage }}
+                </a>
+                or visit a 
+                <a [attr.href]="estimateYourCostPath"
+                   [attr.aria-label]="i18nResprCoverage?.messages?.search_mycoverage_estimate_your_cost_aria_label"
+                   [attr.data-analytics]="i18nResprCoverage?.messages?.search_mycoverage_estimate_your_cost_data_analytics">
+                  {{ estimateYourCostName }}
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+}
+
+<div class="col-12 px-3" id="benefit-section">
+  @if (unsupportedPlan && !showError && !hideSection) {
+    <h2 class="col-12 mt-4">
+      {{ i18nResprCoverage?.messages?.whatscovered_benefits_header }}
+    </h2>
+    <div class="alert alert-secondary in_page mb-2 mb-md-3" role="alert">
+      <div class="row">
+        <div class="col-12 text-start">
+          <span class="info_icon white"></span>
+          <p class="alert_content" [innerHTML]="unsupportedPlan | safeHtmlStandalone"></p>
+        </div>
+      </div>
+    </div>
+  }
+
+  @defer (when whatsCoveredDataLoaded) {
+    @if (whatsCoveredData !== undefined && !showError) {
+      <div class="col-12">
+        <div class="accordion accordion-1" id="accordionBenefitInformation">
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="headingBenefitInformation">
+              <button class="static-text accordion-button px-3 px-md-4" type="button"
+                      data-bs-toggle="collapse" data-bs-target="#collapseBenefitInformation"
+                      aria-expanded="false" aria-controls="collapseBenefitInformation"
+                      [attr.aria-label]="i18nResprCoverage?.messages?.whatscovered_benefits_sub_header">
+                {{ i18nResprCoverage?.messages?.whatscovered_benefits_sub_header }}
+              </button>
+            </h2>
+            <div id="collapseBenefitInformation" class="accordion-collapse collapse"
+                 data-bs-parent="#accordionBenefitInformation">
+              <div class="accordion-body p-3 px-md-4 text-start">
+                <p class="fw-normal">
+                  {{ i18nResprCoverage?.messages?.whatscovered_benefits_body_text }}
+                </p>
+                @if (whatsCoveredData?.benefitDocumentURL || whatsCoveredData?.baagURL) {
+                  <p>
+                    <a href="{{ benefitDocumentURL || whatsCoveredData?.baagURL }}"
+                       class="align-items-baseline underline-link"
+                       [attr.aria-label]="i18nResprCoverage?.messages?.download_pdf_aria_label"
+                       [attr.data-analytics]="i18nResprCoverage?.messages?.download_pdf_data_analytics">
+                      {{ i18nResprCoverage?.messages?.download_pdf_link_text }}
+                    </a>
+                  </p>
+                }
+              </div>
+            </div>
+            @if (whatsCoveredData && whatsCoveredData?.disclaimer && whatsCoveredData?.disclaimer?.data !== undefined) {
+              <div class="col-12 col-md-6 col-lg-4 ps-md-2 mt-3 mt-md-0 paddin-right-unset">
+                <button class="static-text col-12 btn btn-secondary"
+                        [attr.aria-label]="i18nResprCoverage?.messages?.read_before_get_care_aria_label"
+                        [attr.data-analytics]="i18nResprCoverage?.messages?.read_before_get_care_data_analytics"
+                        data-bs-toggle="modal" data-bs-target="#readBeforeCareModal" (click)="show()">
+                  <span class="static-text">{{ i18nResprCoverage?.messages?.read_before_get_care_cta_text }}</span>
+                </button>
+                <realign-whatscovered-modal></realign-whatscovered-modal>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+
+  @if (!unsupportedPlan && !yearEndBenefits) {
+    @for (benefit of (whatsCoveredData?.benefits ?? []); let i = $index; track benefit?.id) {
+      @let baseId = 'b' + i;
+      @let headingId = 'heading-' + baseId;
+      @let collapseId = 'collapse-' + baseId;
+      
+      <div class="col-12 mt-3">
+        <div class="accordion accordion-1">
+          <div class="accordion-item">
+            <h2 class="accordion-header" [id]="headingId">
+              <button class="static-text accordion-button justify-content-between px-3 px-md-4"
+                      type="button" (click)="benefit.expanded = !benefit.expanded"
+                      [attr.aria-expanded]="benefit.expanded"
+                      [attr.aria-controls]="collapseId"
+                      [class.collapsed]="!benefit.expanded">
+                <span [innerHTML]="highlightedHeadings[i]"></span>
+              </button>
+            </h2>
+            <div [id]="collapseId" class="accordion-collapse collapse"
+                 [class.show]="benefit.expanded">
+              <div class="accordion-body p-3 px-md-4">
+                @switch (benefit?.contentType) {
+                  @case ('TEXT_ONLY') {
+                    <div class="col-12">
+                      <div [innerHTML]="sanitizedHtml[i]"></div>
+                    </div>
+                  }
+                  @case ('TABLE_ONLY') {
+                    <div class="table-responsive mx-n3 mx-md-n4 my-n3">
+                      <div [innerHTML]="sanitizedHtml[i]"></div>
+                    </div>
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+@if (yearEndBenefitsFlag) {
+  <div>
+    <h1>YEAR END BENEFITS flag:: {{ yearEndBenefitsFlag }}</h1>
+    <h1>YEAR END BENEFITS:: {{ yearEndBenefits }}</h1>
+    @defer (when isWhatscovered) {
+      <mycoverage-realign-medical-whatscovered-plandocuments></mycoverage-realign-medical-whatscovered-plandocuments>
+      <mycoverage-realign-medical-whatscovered-certs-and-riders></mycoverage-realign-medical-whatscovered-certs-and-riders>
+    } @placeholder {
+      <ng-container>
+        <div class="skeletonTabsOverview"></div>
+      </ng-container>
+    }
+    @if (!showParentInfoMessage()) {
+      <div>
+        <mycoverage-realign-medical-whatscovered-helplinks></mycoverage-realign-medical-whatscovered-helplinks>
+      </div>
+    }
+  </div>
+}
+
